@@ -16,15 +16,17 @@ aData$date <- as.Date(aData$date)
 ```{r totalsteps}
 tSteps <- aggregate(steps ~ date, data = aData, sum)
 h <- hist(tSteps$steps,xlab="Steps",main="Histogram of Total Number of Steps Taken Each Day", breaks = 10)
+
 xfit<-seq(min(tSteps$steps),max(tSteps$steps))
 yfit<-dnorm(xfit,mean=mean(tSteps$steps),sd=sd(tSteps$steps))
 yfit <- yfit*diff(h$mids[1:2])*length(tSteps$steps)
-lines(xfit, yfit, col="blue", lwd=2) 
+lines(xfit, yfit, col="blue", lwd=2)
+
 mn <- sprintf("%5.2f",mean(tSteps$steps))
 mdn <- median(tSteps$steps)
 ```
 1. The mean total number of steps taken per day is `r mn`
-1. The mean total number of steps taken per day is `r mdn`  
+1. The median total number of steps taken per day is `r mdn`  
 
 ## What is the average daily activity pattern?
 ```{r avgdaily}
@@ -66,6 +68,7 @@ amn <- sprintf("%5.2f", mean(adj_tSteps$steps))
 amdn <- sprintf("%5.2f", median(adj_tSteps$steps))
 
 h <- hist(adj_tSteps$steps,xlab="Steps",main="Histogram of Adjusted Total Number of Steps Taken Each Day", breaks = 10)
+
 xfit<-seq(min(adj_tSteps$steps),max(adj_tSteps$steps))
 yfit<-dnorm(xfit,mean=mean(adj_tSteps$steps),sd=sd(adj_tSteps$steps))
 yfit <- yfit*diff(h$mids[1:2])*length(adj_tSteps$steps)
@@ -84,6 +87,7 @@ lines(xfit, yfit, col="blue", lwd=2)
 ```{r weekend}
 adj_aData$whatday <- ifelse(weekdays(adj_aData$date) %in% c("Saturday", "Sunday"),"weekend","weekday")
 adj_int_tSteps <- aggregate(steps ~ interval + whatday, data = adj_aData, mean)
+
 scalesList <- list(x = list(labels = iData$timestamp[whint], at = iData$interval[whint]))
 xyplot(steps ~ interval | whatday, data = adj_int_tSteps, layout = c(1,2), type ="l", scales = scalesList, main="Average Number Of Steps Taken")
 
