@@ -17,12 +17,7 @@ aData$date <- as.Date(aData$date)
 
 ```r
 tSteps <- aggregate(steps ~ date, data = aData, sum)
-h <- hist(tSteps$steps,xlab="Steps",main="Histogram of Total Number of Steps Taken Each Day", breaks = 10)
-
-xfit<-seq(min(tSteps$steps),max(tSteps$steps))
-yfit<-dnorm(xfit,mean=mean(tSteps$steps),sd=sd(tSteps$steps))
-yfit <- yfit*diff(h$mids[1:2])*length(tSteps$steps)
-lines(xfit, yfit, col="blue", lwd=2)
+hist(tSteps$steps,xlab="Steps",main="Histogram of Total Number of Steps Taken Each Day")
 ```
 
 ![plot of chunk totalsteps](figure/totalsteps.png) 
@@ -39,29 +34,23 @@ mdn <- median(tSteps$steps)
 ```r
 int_tSteps <- aggregate(steps ~ interval, data = aData, mean)
 
-#Make Intervals Prettier
-iData <- int_tSteps
-iData$steps <- NULL
-fst <- floor(iData$interval/100)
-lst <- sprintf("%02d",iData$interval %% 100)
-iData$timestamp <- paste(fst,lst,sep=":")
+#Make Timestamps Prettier
+ts = seq(1, 288, 48)
 
-#Number of ticks on x-axis
-whint <- seq(1,288,47)
+int_tSteps$timestamp <- strptime(sprintf("%04d",int_tSteps$interval),"%H%M")
+scalesList <- list(x = list(labels = format(int_tSteps$timestamp[ts],"%H:%M"), at = int_tSteps$interval[ts]))
 
-with(int_tSteps, plot(interval, steps, type="l", main = "Average Number Of Steps Taken", xaxt = "n"))
-
-axis(side=1, at = int_tSteps$interval[whint], labels = iData$timestamp[whint])
+xyplot(steps ~ interval, data = int_tSteps, type ="l", main="Average Number Of Steps Taken", scales = scalesList)
 ```
 
 ![plot of chunk avgdaily](figure/avgdaily.png) 
 
 ```r
-maxsteps <- iData[which.max(int_tSteps$steps),2]
-maxsteps2 <- iData[which.max(int_tSteps$steps) + 1,2]
+maxsteps <- format(int_tSteps[which.max(int_tSteps$steps),3],"%H:%M")
+maxsteps2 <- format(int_tSteps[which.max(int_tSteps$steps) + 1,3],"%H:%M")
 maxstepsd <- sprintf("%3.2f", int_tSteps[which.max(int_tSteps$steps),2])
 ```
-1. The 5-minute interval, on average across all the days in the dataset, containing the maximum number of steps is 8:35 to 8:40 with 206.17 steps
+1. The 5-minute interval, on average across all the days in the dataset, containing the maximum number of steps is 08:35 to 08:40 with 206.17 steps
 
 ## Imputing missing values
 
@@ -78,12 +67,7 @@ adj_tSteps <- aggregate(steps ~ date, data = adj_aData, sum)
 amn <- sprintf("%5.2f", mean(adj_tSteps$steps))
 amdn <- sprintf("%5.2f", median(adj_tSteps$steps))
 
-h <- hist(adj_tSteps$steps,xlab="Steps",main="Histogram of Adjusted Total Number of Steps Taken Each Day", breaks = 10)
-
-xfit<-seq(min(adj_tSteps$steps),max(adj_tSteps$steps))
-yfit<-dnorm(xfit,mean=mean(adj_tSteps$steps),sd=sd(adj_tSteps$steps))
-yfit <- yfit*diff(h$mids[1:2])*length(adj_tSteps$steps)
-lines(xfit, yfit, col="blue", lwd=2) 
+hist(adj_tSteps$steps,xlab="Steps",main="Histogram of Adjusted Total Number of Steps Taken Each Day")
 ```
 
 ![plot of chunk missvalues](figure/missvalues.png) 
@@ -101,8 +85,12 @@ lines(xfit, yfit, col="blue", lwd=2)
 adj_aData$whatday <- ifelse(weekdays(adj_aData$date) %in% c("Saturday", "Sunday"),"weekend","weekday")
 adj_int_tSteps <- aggregate(steps ~ interval + whatday, data = adj_aData, mean)
 
-scalesList <- list(x = list(labels = iData$timestamp[whint], at = iData$interval[whint]))
-xyplot(steps ~ interval | whatday, data = adj_int_tSteps, layout = c(1,2), type ="l", scales = scalesList, main="Average Number Of Steps Taken")
+#Make Intervals Prettier
+adj_int_tSteps$timestamp <- strptime(sprintf("%04d",adj_int_tSteps$interval),"%H%M")
+scalesList <- list(x = list(labels = format(adj_int_tSteps$timestamp[ts],"%H:%M"), at = adj_int_tSteps$interval[ts]))
+
+
+xyplot(steps ~ interval | whatday, data = adj_int_tSteps, layout = c(1,2), type ="l", main="Average Number Of Steps Taken", scales = scalesList)
 ```
 
 ![plot of chunk weekend](figure/weekend.png) 
